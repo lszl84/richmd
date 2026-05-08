@@ -5,6 +5,7 @@
 #include <wx/msgdlg.h>
 #include <wx/file.h>
 #include <wx/config.h>
+#include <wx/settings.h>
 
 namespace {
 
@@ -15,15 +16,29 @@ constexpr int kDefSize  = 12, kH1Size = 30, kH2Size = 24, kH3Size = 19;
 constexpr int kH4Size   = 16, kH5Size = 14, kH6Size = 13, kCodeSize = 11;
 constexpr int kDebounceMs = 200;
 
-const wxColour kBg          = wxColour(30,  30,  35);
-const wxColour kText        = wxColour(210, 210, 215);
-const wxColour kHeading     = wxColour(240, 240, 245);
-const wxColour kCodeBg      = wxColour(45,  45,  52);
-const wxColour kCodeText    = wxColour(200, 200, 210);
-const wxColour kBlockBg     = wxColour(38,  40,  48);
+struct Palette {
+    wxColour bg, text, heading, codeBg, codeText, blockBg, fence;
+};
 
-const wxColour kGutterColour = wxColour(80, 80, 90);  // dim # markers
-const wxColour kFenceColour  = wxColour(120, 120, 130);
+const Palette kDarkPalette = {
+    wxColour(30,  30,  35),    // bg
+    wxColour(210, 210, 215),   // text
+    wxColour(240, 240, 245),   // heading
+    wxColour(45,  45,  52),    // codeBg
+    wxColour(200, 200, 210),   // codeText
+    wxColour(38,  40,  48),    // blockBg
+    wxColour(120, 120, 130),   // fence
+};
+
+const Palette kLightPalette = {
+    wxColour(252, 252, 250),   // bg
+    wxColour(35,  37,  42),    // text
+    wxColour(15,  20,  30),    // heading
+    wxColour(238, 238, 240),   // codeBg
+    wxColour(60,  60,  70),    // codeText
+    wxColour(244, 244, 246),   // blockBg
+    wxColour(150, 150, 160),   // fence
+};
 
 // ---- Markdown detectors ----
 
@@ -97,11 +112,21 @@ MDFrame::MDFrame()
               wxDefaultPosition, wxSize(800, 600)),
       debounceTimer_(this, ID_DEBOUNCE) {
 
-    bgColour_       = kBg;
-    textColour_     = kText;
-    headingColour_  = kHeading;
-    codeBgColour_   = kCodeBg;
-    codeTextColour_ = kCodeText;
+    const Palette& palette =
+        wxSystemSettings::GetAppearance().IsDark() ? kDarkPalette : kLightPalette;
+    bgColour_       = palette.bg;
+    textColour_     = palette.text;
+    headingColour_  = palette.heading;
+    codeBgColour_   = palette.codeBg;
+    codeTextColour_ = palette.codeText;
+    blockBgColour_  = palette.blockBg;
+    fenceColour_    = palette.fence;
+
+#ifdef __WXMSW__
+    // Title bar / taskbar icon. The matching ICON resource is named "aaaa"
+    // in src/resources.rc.in so wxICON() can find it by string lookup.
+    SetIcon(wxICON(aaaa));
+#endif
 
     InitFonts();
     BuildLayout();
@@ -384,7 +409,7 @@ void MDFrame::ApplyLineStyle(long lineStart, long lineEnd,
 
     // Fence line (```) — dim marker
     if (IsFenceLine(line)) {
-        wxTextAttr attr(kFenceColour, bgColour_, defFont_);
+        wxTextAttr attr(fenceColour_, bgColour_, defFont_);
         editor_->SetStyle(lineStart, lineEnd, attr);
         return;
     }
@@ -431,7 +456,7 @@ void MDFrame::ApplyMarkdownStyles() {
         long lineEnd   = pos + lineLen;
 
         if (IsFenceLine(line)) {
-            wxTextAttr attr(kFenceColour, bgColour_, defFont_);
+            wxTextAttr attr(fenceColour_, bgColour_, defFont_);
             editor_->SetStyle(lineStart, lineEnd, attr);
             inCodeBlock = !inCodeBlock;
         } else if (inCodeBlock) {
@@ -469,7 +494,7 @@ void MDFrame::StyleHeadingLine(long start, long end, int level) {
 }
 
 void MDFrame::StyleBlockquoteLine(long start, long end) {
-    wxTextAttr attr(textColour_, kBlockBg, defFont_);
+    wxTextAttr attr(textColour_, blockBgColour_, defFont_);
     attr.SetLeftIndent(16, 0);
     editor_->SetStyle(start, end, attr);
 }

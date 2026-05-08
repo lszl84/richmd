@@ -23,12 +23,14 @@ private:
     wxFont boldItalicFont_;
     wxFont codeFont_;
 
-    // Colours (dark theme)
+    // Colours (selected from light/dark palette at construction)
     wxColour bgColour_;
     wxColour textColour_;
     wxColour headingColour_;
     wxColour codeBgColour_;
     wxColour codeTextColour_;
+    wxColour blockBgColour_;
+    wxColour fenceColour_;
 
     void BuildLayout();
     void BuildMenuBar();

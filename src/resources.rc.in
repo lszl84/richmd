@@ -1,6 +1,12 @@
 #define wxUSE_DPI_AWARE_MANIFEST 2
 #include <wx/msw/wx.rc>
 
-// Numeric ID 1 makes Windows Explorer pick this as the .exe's main icon
-// (numeric resource IDs sort before string IDs like wxICON_AAA_*).
+// Two ICON entries that point at the same .ico:
+//  - Integer ID 1 wins Windows Explorer's "main exe icon" lookup, since
+//    numeric resource IDs sort before string IDs.
+//  - Name "aaaa" is what wxICON(aaaa) looks up at runtime to set the
+//    frame's title-bar/taskbar icon. Lowercase 'a' sorts before wx's own
+//    string-named icons (wxICON_AAA_*) — irrelevant here since we already
+//    have ID 1, but keeps the lookup unambiguous.
 1 ICON "@CMAKE_CURRENT_SOURCE_DIR@/richmd.ico"
+aaaa ICON "@CMAKE_CURRENT_SOURCE_DIR@/richmd.ico"

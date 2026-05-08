@@ -121,6 +121,13 @@ if(WIN32)
     ")
 endif()
 
+if(WIN32)
+    # Ship the .ico inside the install tree so the Start Menu shortcut can
+    # reference it explicitly (avoids relying on Explorer pulling the icon
+    # from the .exe — that path can be defeated by Windows' icon cache).
+    install(FILES richmd.ico DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+
 if(LINUX OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     install(FILES richmd.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES richmd.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
@@ -151,8 +158,11 @@ if(WIN32)
     set(CPACK_NSIS_CONTACT "${CPACK_PACKAGE_CONTACT}")
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
     set(CPACK_NSIS_MODIFY_PATH OFF)
+    # CreateShortCut params: link target params iconfile iconindex
+    # Passing the .ico explicitly forces a sharp app icon on the Start Menu
+    # shortcut, independent of Explorer's icon-cache behavior.
     set(CPACK_NSIS_CREATE_ICONS_EXTRA
-        "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\richmd.lnk' '$INSTDIR\\\\bin\\\\richmd.exe'")
+        "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\richmd.lnk' '$INSTDIR\\\\bin\\\\richmd.exe' '' '$INSTDIR\\\\bin\\\\richmd.ico'")
     set(CPACK_NSIS_DELETE_ICONS_EXTRA
         "Delete '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\richmd.lnk'")
 elseif(APPLE)
