@@ -85,9 +85,27 @@ install(TARGETS richmd
 )
 
 if(WIN32)
+    # Use NEW behavior for CMP0207: file(GET_RUNTIME_DEPENDENCIES) normalizes
+    # all paths to forward slashes (otherwise mixed C:\Windows\system32/foo.dll
+    # vs C:/Windows/system32/foo.dll triggers a dev warning).
+    if(POLICY CMP0207)
+        cmake_policy(SET CMP0207 NEW)
+    endif()
+
+    # MSYS2 shells export MINGW_PREFIX (e.g. /clang64 in CLANG64). Its bin/
+    # holds the runtime DLLs we link against — wx_*, libc++, libunwind,
+    # zlib, etc. Pass it to GET_RUNTIME_DEPENDENCIES so the resolver finds
+    # them; CMake on Windows otherwise only searches PATH and may miss the
+    # msys2 paths.
+    if(DEFINED ENV{MINGW_PREFIX})
+        set(_richmd_dll_search_dirs "$ENV{MINGW_PREFIX}/bin")
+    else()
+        set(_richmd_dll_search_dirs "")
+    endif()
+
     # Walk the installed .exe's PE imports and copy non-system runtime DLLs
-    # (wx, libc++, libunwind, zlib, etc.) into bin/ alongside the executable.
-    # PRE excludes Windows API sets, POST drops anything resolved from System32.
+    # into bin/ alongside the executable. PRE excludes Windows API sets,
+    # POST drops anything resolved from System32.
     install(CODE "
         file(GET_RUNTIME_DEPENDENCIES
             EXECUTABLES \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/$<TARGET_FILE_NAME:richmd>\"
@@ -95,6 +113,7 @@ if(WIN32)
             UNRESOLVED_DEPENDENCIES_VAR _unresolved
             PRE_EXCLUDE_REGEXES \"api-ms-.*\" \"ext-ms-.*\"
             POST_EXCLUDE_REGEXES \".*[Ss]ystem32.*\" \".*WINDOWS.*\"
+            DIRECTORIES \"${_richmd_dll_search_dirs}\"
         )
         foreach(_dep \${_resolved})
             file(INSTALL \"\${_dep}\" DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
