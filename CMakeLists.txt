@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-project(richmd LANGUAGES CXX C)
+cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
+project(richmd VERSION 0.1.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -46,8 +46,15 @@ if(APPLE)
 elseif(WIN32)
     # WIN32 makes the linker look for WinMain instead of main.
     # The .manifest declares Per-Monitor V2 DPI awareness; resources.rc pulls
-    # in wx's standard resource block (with wxUSE_DPI_AWARE_MANIFEST=2).
-    add_executable(richmd WIN32 ${SRCS} src/main.exe.manifest src/resources.rc)
+    # in wx's standard resource block (with wxUSE_DPI_AWARE_MANIFEST=2) and
+    # embeds richmd.ico as resource ID 1 (Explorer's exe icon).
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/resources.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/resources.rc
+        @ONLY)
+    add_executable(richmd WIN32 ${SRCS}
+        src/main.exe.manifest
+        ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
 
     # static linking for a self-contained Windows binary (no DLL dependencies)
     target_link_options(richmd PRIVATE -static -fuse-ld=lld)
@@ -68,3 +75,45 @@ if(LINUX OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     install(FILES richmd.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES richmd.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
 endif()
+
+# ---- CPack ----
+set(CPACK_PACKAGE_NAME "richmd")
+set(CPACK_PACKAGE_VENDOR "onlyfastcode")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Live-styling markdown editor")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/lszl84/richmd")
+set(CPACK_PACKAGE_CONTACT "lukasz.sromek@gmail.com")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "richmd")
+set(CPACK_STRIP_FILES ON)
+
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")
+    # HiDPI: tell the NSIS-generated installer .exe to use Per-Monitor DPI
+    # awareness so the wizard isn't bitmap-upscaled (= pixelated) on
+    # high-resolution displays. Requires CMake 3.27+.
+    set(CPACK_NSIS_MANIFEST_DPI_AWARE TRUE)
+    set(CPACK_NSIS_MUI_ICON   "${CMAKE_CURRENT_SOURCE_DIR}/richmd.ico")
+    set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/richmd.ico")
+    set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\richmd.exe")
+    set(CPACK_NSIS_DISPLAY_NAME "richmd")
+    set(CPACK_NSIS_PACKAGE_NAME "richmd")
+    set(CPACK_NSIS_URL_INFO_ABOUT "${CPACK_PACKAGE_HOMEPAGE_URL}")
+    set(CPACK_NSIS_CONTACT "${CPACK_PACKAGE_CONTACT}")
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    set(CPACK_NSIS_MODIFY_PATH OFF)
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA
+        "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\richmd.lnk' '$INSTDIR\\\\bin\\\\richmd.exe'")
+    set(CPACK_NSIS_DELETE_ICONS_EXTRA
+        "Delete '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\richmd.lnk'")
+elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "richmd")
+else()
+    set(CPACK_GENERATOR "DEB;TGZ")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Lukasz Sromek <lukasz.sromek@gmail.com>")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "editors")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${CPACK_PACKAGE_HOMEPAGE_URL}")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+endif()
+
+include(CPack)

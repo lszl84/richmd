@@ -23,6 +23,21 @@ Builds with clang/clang++ via Ninja (see `CMakePresets.json`). Requires wxWidget
 
 On Windows, the build links libc++ and libunwind statically — the resulting executable does not require any DLLs. Per-Monitor V2 HiDPI is enabled via `src/main.exe.manifest` and `src/resources.rc`. On macOS, `src/Info.plist` enables Retina rendering via `NSHighResolutionCapable`.
 
+### Packaging
+
+Once configured, run CPack from the build dir to produce installers:
+
+```bash
+cd build
+cpack          # picks the platform default (NSIS / DragNDrop / DEB+TGZ)
+```
+
+Outputs by platform:
+
+- **Windows** — `richmd-<version>-win64.exe` (NSIS). DPI-aware via `CPACK_NSIS_MANIFEST_DPI_AWARE` so the wizard isn't bitmap-upscaled on HiDPI displays. Multi-resolution `richmd.ico` is used for the installer chrome and embedded as the .exe's app icon.
+- **macOS** — `richmd-<version>-Darwin.dmg` (DragNDrop). The bundle's `Info.plist` declares `NSHighResolutionCapable` for Retina rendering.
+- **Linux** — `richmd-<version>-Linux.deb` and `.tar.gz`. The `.deb` declares shared-library dependencies via `dpkg-shlibdeps`.
+
 ### VSCode / VSCodium
 
 Recommended extensions:

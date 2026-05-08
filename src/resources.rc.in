@@ -1,0 +1,6 @@
+#define wxUSE_DPI_AWARE_MANIFEST 2
+#include <wx/msw/wx.rc>
+
+// Numeric ID 1 makes Windows Explorer pick this as the .exe's main icon
+// (numeric resource IDs sort before string IDs like wxICON_AAA_*).
+1 ICON "@CMAKE_CURRENT_SOURCE_DIR@/richmd.ico"
