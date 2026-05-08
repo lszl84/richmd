@@ -54,4 +54,5 @@ install(TARGETS richmd
 if(LINUX OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     install(FILES richmd.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES richmd.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
+    install(FILES richmd.png DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps)
 endif()
