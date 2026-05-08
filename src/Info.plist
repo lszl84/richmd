@@ -6,6 +6,8 @@
     <string>com.devmindscape.richmd</string>
     <key>CFBundleName</key>
     <string>richmd</string>
+    <key>CFBundleIconFile</key>
+    <string>richmd</string>
     <key>CFBundleDevelopmentRegion</key>
     <string>English</string>
     <key>CFBundlePackageType</key>

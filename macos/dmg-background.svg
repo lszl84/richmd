@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5f5f7"/>
+      <stop offset="1" stop-color="#e6e6ea"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+
+  <!-- arrow -->
+  <g stroke="#aaa" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="220" y1="200" x2="380" y2="200"/>
+    <polyline points="360,180 380,200 360,220"/>
+  </g>
+
+  <!-- helper text -->
+  <text x="300" y="350" text-anchor="middle"
+        font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+        font-size="14" fill="#888">Drag richmd to Applications to install</text>
+</svg>

@@ -48,7 +48,24 @@ set(SRCS
 )
 
 if(APPLE)
-    add_executable(richmd MACOSX_BUNDLE ${SRCS})
+    # Compile macos/richmd.iconset/* into a single .icns at build time using
+    # Apple's iconutil. The .icns is then dropped into the .app's Resources/
+    # via MACOSX_PACKAGE_LOCATION, and Info.plist's CFBundleIconFile=richmd
+    # picks it up.
+    set(RICHMD_ICNS ${CMAKE_CURRENT_BINARY_DIR}/richmd.icns)
+    file(GLOB RICHMD_ICONSET_PNGS
+         ${CMAKE_CURRENT_SOURCE_DIR}/macos/richmd.iconset/*.png)
+    add_custom_command(
+        OUTPUT ${RICHMD_ICNS}
+        COMMAND iconutil -c icns
+                ${CMAKE_CURRENT_SOURCE_DIR}/macos/richmd.iconset
+                -o ${RICHMD_ICNS}
+        DEPENDS ${RICHMD_ICONSET_PNGS}
+        COMMENT "Generating richmd.icns")
+    set_source_files_properties(${RICHMD_ICNS} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+
+    add_executable(richmd MACOSX_BUNDLE ${SRCS} ${RICHMD_ICNS})
 
     # Custom plist: enables Retina/HiDPI rendering and sets bundle metadata.
     set_target_properties(richmd PROPERTIES
@@ -168,6 +185,15 @@ if(WIN32)
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "richmd")
+    # Mounted-volume icon (Finder sidebar / desktop) reuses the bundle icon.
+    set(CPACK_DMG_VOLUME_ICON "${RICHMD_ICNS}")
+    # Custom Finder window: gradient PNG with a left/right "drag" hint, and
+    # an AppleScript that creates the /Applications symlink and positions
+    # the .app and Applications icons over the arrow.
+    set(CPACK_DMG_BACKGROUND_IMAGE
+        "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-background.png")
+    set(CPACK_DMG_DS_STORE_SETUP_SCRIPT
+        "${CMAKE_CURRENT_SOURCE_DIR}/macos/dmg-setup.applescript")
 else()
     set(CPACK_GENERATOR "DEB;TGZ")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Lukasz Sromek <luke@devmindscape.com>")
