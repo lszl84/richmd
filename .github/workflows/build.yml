@@ -76,11 +76,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install NSIS
-        # windows-2025 (= windows-latest) does not preinstall NSIS. Choco does.
-        shell: pwsh
-        run: choco install nsis -y --no-progress
-
       - name: Set up MSYS2 (CLANG64)
         uses: msys2/setup-msys2@v2
         with:
@@ -90,9 +85,8 @@ jobs:
             mingw-w64-clang-x86_64-toolchain
             mingw-w64-clang-x86_64-cmake
             mingw-w64-clang-x86_64-ninja
-        # We deliberately don't install msys2's wxwidgets package — the
-        # CLANG64 build is shared, and our target uses -static for a
-        # DLL-free .exe. CMake's FetchContent path builds wx statically.
+            mingw-w64-clang-x86_64-wxwidgets3.2-msw
+            mingw-w64-clang-x86_64-nsis
 
       - name: Configure
         run: cmake --preset release
@@ -102,11 +96,7 @@ jobs:
 
       - name: Package
         working-directory: build
-        # NSIS is preinstalled on GitHub Windows runners; expose makensis to
-        # the msys2 shell so cpack's NSIS generator can find it.
-        run: |
-          export PATH="/c/Program Files (x86)/NSIS:$PATH"
-          cpack
+        run: cpack
 
       - name: Upload installer
         uses: actions/upload-artifact@v7

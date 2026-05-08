@@ -21,7 +21,7 @@ cmake --build --preset default
 
 Builds with clang/clang++ via Ninja (see `CMakePresets.json`). Requires wxWidgets 3.2.8+; if not found on the system, CMake fetches and builds it automatically.
 
-On Windows, the build links libc++ and libunwind statically — the resulting executable does not require any DLLs. Per-Monitor V2 HiDPI is enabled via `src/main.exe.manifest` and `src/resources.rc`. On macOS, `src/Info.plist` enables Retina rendering via `NSHighResolutionCapable`.
+On Windows, the build links wxWidgets and the C++ runtime dynamically; `install(... RUNTIME_DEPENDENCIES)` walks the executable's PE imports and copies the required DLLs (wx, libc++, libunwind, zlib, etc.) next to `richmd.exe` so the NSIS installer is self-contained. Per-Monitor V2 HiDPI is enabled via `src/main.exe.manifest` and `src/resources.rc`. On macOS, `src/Info.plist` enables Retina rendering via `NSHighResolutionCapable`.
 
 ### Packaging
 

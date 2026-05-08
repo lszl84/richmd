@@ -66,9 +66,10 @@ elseif(WIN32)
         src/main.exe.manifest
         ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
 
-    # static linking for a self-contained Windows binary (no DLL dependencies)
-    target_link_options(richmd PRIVATE -static -fuse-ld=lld)
-    target_link_libraries(richmd PRIVATE c++ c++abi unwind)
+    # lld is faster than the default linker; we link wx and the C++ runtime
+    # dynamically — runtime DLLs are copied into the install tree below via
+    # install(... RUNTIME_DEPENDENCIES).
+    target_link_options(richmd PRIVATE -fuse-ld=lld)
 else()
     add_executable(richmd ${SRCS})
 endif()
@@ -77,10 +78,29 @@ target_link_libraries(richmd PRIVATE ${wxWidgets_LIBRARIES})
 target_compile_options(richmd PRIVATE -Wall -Wextra -Wno-unused-parameter)
 
 include(GNUInstallDirs)
-install(TARGETS richmd
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    BUNDLE DESTINATION .
-)
+
+if(WIN32)
+    # On Windows, walk the .exe's PE imports and copy non-system runtime DLLs
+    # (wx, libc++, libunwind, zlib, etc.) into the install bin/ alongside the
+    # executable. Excludes Windows API set DLLs (api-ms-*, ext-ms-*) and
+    # anything resolved out of System32 — those live with the OS.
+    install(TARGETS richmd
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        RUNTIME_DEPENDENCIES
+            PRE_EXCLUDE_REGEXES
+                "api-ms-.*"
+                "ext-ms-.*"
+            POST_EXCLUDE_REGEXES
+                ".*[Ss]ystem32.*"
+                ".*WINDOWS.*"
+    )
+else()
+    install(TARGETS richmd
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION .
+    )
+endif()
+
 if(LINUX OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     install(FILES richmd.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES richmd.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
