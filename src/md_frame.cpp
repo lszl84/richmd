@@ -387,7 +387,6 @@ void MDFrame::ApplyLineStyle(long lineStart, long lineEnd,
     // Fence line (```) — dim marker
     if (IsFenceLine(line)) {
         wxTextAttr attr(kFenceColour, bgColour_, defFont_);
-        attr.SetLeftIndent(kLeftMargin, 0);
         editor_->SetStyle(lineStart, lineEnd, attr);
         return;
     }
@@ -435,7 +434,6 @@ void MDFrame::ApplyMarkdownStyles() {
 
         if (IsFenceLine(line)) {
             wxTextAttr attr(kFenceColour, bgColour_, defFont_);
-            attr.SetLeftIndent(kLeftMargin, 0);
             editor_->SetStyle(lineStart, lineEnd, attr);
             inCodeBlock = !inCodeBlock;
         } else if (inCodeBlock) {
@@ -467,40 +465,37 @@ void MDFrame::ApplyMarkdownStyles() {
 // ---- Paragraph styling ----
 
 void MDFrame::StyleHeadingLine(long start, long end, int level) {
-    // Hanging indent: # markers pull into the gutter, text aligns with body
     wxTextAttr attr(headingColour_, bgColour_, GetHeadingFont(level));
-    attr.SetLeftIndent(kLeftMargin, -kLeftMargin);
+    attr.SetLeftIndent(0, 0);
     editor_->SetStyle(start, end, attr);
 
-    // Style the # prefix dim so it visually recedes into the gutter
-    long prefixEnd = start + level + 1;  // e.g. "### " = level #s + space
+    // Dim the # prefix so it visually recedes
+    long prefixEnd = start + level + 1;
     if (prefixEnd > end) prefixEnd = end;
-    wxFont gutterFont = wxFont(wxFontInfo(9).Family(wxFONTFAMILY_DEFAULT));
-    wxTextAttr gutterAttr(kGutterColour, bgColour_, gutterFont);
+    wxTextAttr gutterAttr(kGutterColour);
     editor_->SetStyle(start, prefixEnd, gutterAttr);
 }
 
 void MDFrame::StyleBlockquoteLine(long start, long end) {
     wxTextAttr attr(textColour_, kBlockBg, defFont_);
-    attr.SetLeftIndent(kLeftMargin + 16, 0);
+    attr.SetLeftIndent(16, 0);
     editor_->SetStyle(start, end, attr);
 }
 
 void MDFrame::StyleListLine(long start, long end) {
     wxTextAttr attr(textColour_, bgColour_, defFont_);
-    attr.SetLeftIndent(kLeftMargin + kListExtra, kLeftMargin / 2);
+    attr.SetLeftIndent(20, 4);
     editor_->SetStyle(start, end, attr);
 }
 
 void MDFrame::StyleCodeLine(long start, long end) {
     wxTextAttr attr(codeTextColour_, bgColour_, codeFont_);
-    attr.SetLeftIndent(kLeftMargin, 0);
     editor_->SetStyle(start, end, attr);
 }
 
 void MDFrame::StyleNormalLine(long start, long end) {
     wxTextAttr attr(textColour_, bgColour_, defFont_);
-    attr.SetLeftIndent(kLeftMargin, 0);
+    attr.SetLeftIndent(0, 0);
     editor_->SetStyle(start, end, attr);
 }
 
