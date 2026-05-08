@@ -1,8 +1,9 @@
 # Build output
 build/
 
-# IDE
+# IDE / tooling
 .idea/
+.claude/
 *.swp
 *.swo
 *~
