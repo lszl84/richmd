@@ -91,7 +91,7 @@ void GetLineRange(const wxString& text, long pos, long& lineStart, long& lineEnd
 // ================================================================
 
 MDFrame::MDFrame()
-    : wxFrame(nullptr, wxID_ANY, "richmd — Markdown Editor",
+    : wxFrame(nullptr, wxID_ANY, "richmd - Markdown Editor",
               wxDefaultPosition, wxSize(800, 600)),
       debounceTimer_(this, ID_DEBOUNCE) {
 
@@ -109,7 +109,7 @@ MDFrame::MDFrame()
     Bind(wxEVT_TIMER, &MDFrame::OnDebounceTimer, this, ID_DEBOUNCE);
 
     editor_->SetValue(
-        "# richmd — Markdown Editor\n\n"
+        "# richmd - Markdown Editor\n\n"
         "Type **markdown** and see it *style automatically*.\n\n"
         "## Features\n\n"
         "- Auto-headings with #\n"
@@ -283,8 +283,8 @@ void MDFrame::OnFileHistory(wxCommandEvent& evt) {
 
 void MDFrame::UpdateTitle() {
     wxString title = filePath_.empty()
-        ? "richmd — Markdown Editor"
-        : filePath_.AfterLast('/') + " — richmd";
+        ? "richmd - Markdown Editor"
+        : filePath_.AfterLast('/') + " - richmd";
     SetTitle(title);
 }
 
