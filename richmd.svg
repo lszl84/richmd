@@ -1,11 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <!-- Background -->
   <rect width="256" height="256" rx="48" fill="#1a1b2e"/>
   <rect x="8" y="8" width="240" height="240" rx="40" fill="#252640"/>
-  <!-- Markdown # symbol -->
-  <text x="80" y="155" font-family="sans-serif" font-size="120" font-weight="bold" fill="#4a9eff">#</text>
+  <!-- Hash symbol -->
+  <g transform="translate(72, 62)" fill="none" stroke="#4a9eff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left vertical bar -->
+    <line x1="25" y1="10" x2="25" y2="122"/>
+    <!-- Right vertical bar -->
+    <line x1="75" y1="10" x2="75" y2="122"/>
+    <!-- Upper horizontal bar -->
+    <line x1="10" y1="38" x2="90" y2="38"/>
+    <!-- Lower horizontal bar -->
+    <line x1="10" y1="94" x2="90" y2="94"/>
+  </g>
   <!-- Styling hint lines -->
-  <rect x="80" y="180" width="90" height="6" rx="3" fill="#6ecf6e" opacity="0.7"/>
-  <rect x="80" y="195" width="60" height="6" rx="3" fill="#6ecf6e" opacity="0.5"/>
-  <rect x="80" y="210" width="75" height="6" rx="3" fill="#6ecf6e" opacity="0.35"/>
+  <rect x="80" y="190" width="90" height="6" rx="3" fill="#6ecf6e" opacity="0.7"/>
+  <rect x="80" y="205" width="60" height="6" rx="3" fill="#6ecf6e" opacity="0.5"/>
+  <rect x="80" y="220" width="75" height="6" rx="3" fill="#6ecf6e" opacity="0.35"/>
 </svg>
