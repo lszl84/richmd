@@ -468,12 +468,6 @@ void MDFrame::StyleHeadingLine(long start, long end, int level) {
     wxTextAttr attr(headingColour_, bgColour_, GetHeadingFont(level));
     attr.SetLeftIndent(0, 0);
     editor_->SetStyle(start, end, attr);
-
-    // Dim the # prefix so it visually recedes
-    long prefixEnd = start + level + 1;
-    if (prefixEnd > end) prefixEnd = end;
-    wxTextAttr gutterAttr(kGutterColour);
-    editor_->SetStyle(start, prefixEnd, gutterAttr);
 }
 
 void MDFrame::StyleBlockquoteLine(long start, long end) {
