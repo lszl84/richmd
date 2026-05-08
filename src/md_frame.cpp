@@ -475,6 +475,10 @@ void MDFrame::StyleListLine(long start, long end) {
 }
 
 void MDFrame::StyleCodeLine(long start, long end) {
+    // Extend to include trailing newline for full-width background
+    wxString fullText = editor_->GetValue();
+    if (end < (long)fullText.length() && fullText[(size_t)end] == '\n')
+        ++end;
     wxTextAttr attr(codeTextColour_, codeBgColour_, codeFont_);
     editor_->SetStyle(start, end, attr);
 }
