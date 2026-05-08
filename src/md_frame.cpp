@@ -398,11 +398,13 @@ void MDFrame::ApplyLineStyle(long lineStart, long lineEnd,
     int hLevel = DetectHeading(line);
     if (hLevel > 0)
         StyleHeadingLine(lineStart, lineEnd, hLevel);
-    else if (IsBlockquote(line))
+    else if (IsBlockquote(line)) {
         StyleBlockquoteLine(lineStart, lineEnd);
-    else if (IsUnorderedList(line) || IsOrderedList(line))
+        ApplyInlineStyles(lineStart, lineEnd, fullText);
+    } else if (IsUnorderedList(line) || IsOrderedList(line)) {
         StyleListLine(lineStart, lineEnd);
-    else {
+        ApplyInlineStyles(lineStart, lineEnd, fullText);
+    } else {
         StyleNormalLine(lineStart, lineEnd);
         ApplyInlineStyles(lineStart, lineEnd, fullText);
     }
@@ -436,11 +438,13 @@ void MDFrame::ApplyMarkdownStyles() {
             int hLevel = DetectHeading(line);
             if (hLevel > 0)
                 StyleHeadingLine(lineStart, lineEnd, hLevel);
-            else if (IsBlockquote(line))
+            else if (IsBlockquote(line)) {
                 StyleBlockquoteLine(lineStart, lineEnd);
-            else if (IsUnorderedList(line) || IsOrderedList(line))
+                ApplyInlineStyles(lineStart, lineEnd, fullText);
+            } else if (IsUnorderedList(line) || IsOrderedList(line)) {
                 StyleListLine(lineStart, lineEnd);
-            else {
+                ApplyInlineStyles(lineStart, lineEnd, fullText);
+            } else {
                 StyleNormalLine(lineStart, lineEnd);
                 ApplyInlineStyles(lineStart, lineEnd, fullText);
             }
