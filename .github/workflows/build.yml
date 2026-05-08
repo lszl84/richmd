@@ -13,7 +13,7 @@ jobs:
     name: Linux (Ubuntu 24.04)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install build deps
         run: |
@@ -34,7 +34,7 @@ jobs:
         run: cpack
 
       - name: Upload installers
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-installers
           path: |
@@ -45,7 +45,7 @@ jobs:
     name: macOS
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install build deps
         run: brew install ninja wxwidgets
@@ -61,7 +61,7 @@ jobs:
         run: cpack
 
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: macos-installer
           path: build/richmd-*.dmg
@@ -73,7 +73,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up MSYS2 (CLANG64)
         uses: msys2/setup-msys2@v2
@@ -103,7 +103,7 @@ jobs:
           cpack
 
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-installer
           path: build/richmd-*.exe

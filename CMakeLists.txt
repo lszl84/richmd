@@ -20,6 +20,11 @@ else()
     include(FetchContent)
     set(wxBUILD_SHARED OFF)
 
+    # wx 3.2.x's top-level CMakeLists declares cmake_minimum_required < 3.5,
+    # which CMake 4+ rejects. This shim re-establishes the old policy floor
+    # for the FetchContent sub-build only.
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
+
     FetchContent_Declare(
         wxWidgets
         GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
