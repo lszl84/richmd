@@ -21,7 +21,11 @@ const wxColour kHeading     = wxColour(240, 240, 245);
 const wxColour kCodeBg      = wxColour(45,  45,  52);
 const wxColour kCodeText    = wxColour(200, 200, 210);
 const wxColour kBlockBg     = wxColour(38,  40,  48);
-const wxColour kFenceColour = wxColour(120, 120, 130);
+constexpr int kLeftMargin = 32;  // px gutter for all text
+constexpr int kListExtra  = 12;  // extra indent for lists
+
+const wxColour kGutterColour = wxColour(80, 80, 90);  // dim # markers
+const wxColour kFenceColour  = wxColour(120, 120, 130);
 
 // ---- Markdown detectors ----
 
@@ -383,6 +387,7 @@ void MDFrame::ApplyLineStyle(long lineStart, long lineEnd,
     // Fence line (```) — dim marker
     if (IsFenceLine(line)) {
         wxTextAttr attr(kFenceColour, bgColour_, defFont_);
+        attr.SetLeftIndent(kLeftMargin, 0);
         editor_->SetStyle(lineStart, lineEnd, attr);
         return;
     }
@@ -430,6 +435,7 @@ void MDFrame::ApplyMarkdownStyles() {
 
         if (IsFenceLine(line)) {
             wxTextAttr attr(kFenceColour, bgColour_, defFont_);
+            attr.SetLeftIndent(kLeftMargin, 0);
             editor_->SetStyle(lineStart, lineEnd, attr);
             inCodeBlock = !inCodeBlock;
         } else if (inCodeBlock) {
@@ -461,31 +467,40 @@ void MDFrame::ApplyMarkdownStyles() {
 // ---- Paragraph styling ----
 
 void MDFrame::StyleHeadingLine(long start, long end, int level) {
+    // Hanging indent: # markers pull into the gutter, text aligns with body
     wxTextAttr attr(headingColour_, bgColour_, GetHeadingFont(level));
-    attr.SetLeftIndent(0, 0);
+    attr.SetLeftIndent(kLeftMargin, -kLeftMargin);
     editor_->SetStyle(start, end, attr);
+
+    // Style the # prefix dim so it visually recedes into the gutter
+    long prefixEnd = start + level + 1;  // e.g. "### " = level #s + space
+    if (prefixEnd > end) prefixEnd = end;
+    wxFont gutterFont = wxFont(wxFontInfo(9).Family(wxFONTFAMILY_DEFAULT));
+    wxTextAttr gutterAttr(kGutterColour, bgColour_, gutterFont);
+    editor_->SetStyle(start, prefixEnd, gutterAttr);
 }
 
 void MDFrame::StyleBlockquoteLine(long start, long end) {
     wxTextAttr attr(textColour_, kBlockBg, defFont_);
-    attr.SetLeftIndent(16, 0);
+    attr.SetLeftIndent(kLeftMargin + 16, 0);
     editor_->SetStyle(start, end, attr);
 }
 
 void MDFrame::StyleListLine(long start, long end) {
     wxTextAttr attr(textColour_, bgColour_, defFont_);
-    attr.SetLeftIndent(20, 4);
+    attr.SetLeftIndent(kLeftMargin + kListExtra, kLeftMargin / 2);
     editor_->SetStyle(start, end, attr);
 }
 
 void MDFrame::StyleCodeLine(long start, long end) {
     wxTextAttr attr(codeTextColour_, bgColour_, codeFont_);
+    attr.SetLeftIndent(kLeftMargin, 0);
     editor_->SetStyle(start, end, attr);
 }
 
 void MDFrame::StyleNormalLine(long start, long end) {
     wxTextAttr attr(textColour_, bgColour_, defFont_);
-    attr.SetLeftIndent(0, 0);
+    attr.SetLeftIndent(kLeftMargin, 0);
     editor_->SetStyle(start, end, attr);
 }
 
