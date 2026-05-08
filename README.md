@@ -14,13 +14,21 @@ A live-styling markdown editor built with wxWidgets. Type markdown and see headi
 ## Building
 
 ```bash
-mkdir build && cd build
-cmake ..
-cmake --build .
-./richmd
+cmake --preset default
+cmake --build --preset default
+./build/richmd
 ```
 
-Requires wxWidgets 3.2+. If not found on the system, CMake will fetch and build it automatically.
+Builds with clang/clang++ via Ninja (see `CMakePresets.json`). Requires wxWidgets 3.2.8+; if not found on the system, CMake fetches and builds it automatically.
+
+On Windows, the build links libc++ and libunwind statically — the resulting executable does not require any DLLs.
+
+### VSCode / VSCodium
+
+Recommended extensions:
+- **CMake** (Microsoft) — automatic preset detection, required by `launch.json`
+- **lldb-dap** (LLVM) — debugging
+- **clangd** (LLVM) — code navigation
 
 ## License
 
