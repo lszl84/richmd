@@ -21,8 +21,6 @@ const wxColour kHeading     = wxColour(240, 240, 245);
 const wxColour kCodeBg      = wxColour(45,  45,  52);
 const wxColour kCodeText    = wxColour(200, 200, 210);
 const wxColour kBlockBg     = wxColour(38,  40,  48);
-constexpr int kLeftMargin = 32;  // px gutter for all text
-constexpr int kListExtra  = 12;  // extra indent for lists
 
 const wxColour kGutterColour = wxColour(80, 80, 90);  // dim # markers
 const wxColour kFenceColour  = wxColour(120, 120, 130);
