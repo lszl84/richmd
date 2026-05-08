@@ -79,26 +79,30 @@ target_compile_options(richmd PRIVATE -Wall -Wextra -Wno-unused-parameter)
 
 include(GNUInstallDirs)
 
+install(TARGETS richmd
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    BUNDLE DESTINATION .
+)
+
 if(WIN32)
-    # On Windows, walk the .exe's PE imports and copy non-system runtime DLLs
-    # (wx, libc++, libunwind, zlib, etc.) into the install bin/ alongside the
-    # executable. Excludes Windows API set DLLs (api-ms-*, ext-ms-*) and
-    # anything resolved out of System32 — those live with the OS.
-    install(TARGETS richmd
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        RUNTIME_DEPENDENCIES
-            PRE_EXCLUDE_REGEXES
-                "api-ms-.*"
-                "ext-ms-.*"
-            POST_EXCLUDE_REGEXES
-                ".*[Ss]ystem32.*"
-                ".*WINDOWS.*"
-    )
-else()
-    install(TARGETS richmd
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        BUNDLE DESTINATION .
-    )
+    # Walk the installed .exe's PE imports and copy non-system runtime DLLs
+    # (wx, libc++, libunwind, zlib, etc.) into bin/ alongside the executable.
+    # PRE excludes Windows API sets, POST drops anything resolved from System32.
+    install(CODE "
+        file(GET_RUNTIME_DEPENDENCIES
+            EXECUTABLES \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/$<TARGET_FILE_NAME:richmd>\"
+            RESOLVED_DEPENDENCIES_VAR _resolved
+            UNRESOLVED_DEPENDENCIES_VAR _unresolved
+            PRE_EXCLUDE_REGEXES \"api-ms-.*\" \"ext-ms-.*\"
+            POST_EXCLUDE_REGEXES \".*[Ss]ystem32.*\" \".*WINDOWS.*\"
+        )
+        foreach(_dep \${_resolved})
+            file(INSTALL \"\${_dep}\" DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
+        endforeach()
+        if(_unresolved)
+            message(WARNING \"Unresolved runtime deps: \${_unresolved}\")
+        endif()
+    ")
 endif()
 
 if(LINUX OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
