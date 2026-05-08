@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.onlyfastcode.richmd</string>
+    <string>com.devmindscape.richmd</string>
     <key>CFBundleName</key>
     <string>richmd</string>
     <key>CFBundleDevelopmentRegion</key>
