@@ -5,7 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # wxWidgets configuration
+# REQUIRED_VERSION: minimum acceptable system install (matches Ubuntu 24.04 LTS).
+# FETCH_VERSION:    version FetchContent pulls when no system install is found.
+#                   3.2.8+ is required for libc++ (Windows mingw-clang/CLANG64);
+#                   3.2.4's wx/ustring.h hits an undefined std::char_traits<unsigned int>.
 set(wxWidgets_REQUIRED_VERSION "3.2.4")
+set(wxWidgets_FETCH_VERSION    "3.2.8")
 set(wxWidgets_REQUIRED_COMPONENTS core base)
 
 find_package(wxWidgets ${wxWidgets_REQUIRED_VERSION} QUIET COMPONENTS ${wxWidgets_REQUIRED_COMPONENTS})
@@ -15,7 +20,7 @@ if(wxWidgets_FOUND)
     include(${wxWidgets_USE_FILE})
     message(STATUS "-- libraries: ${wxWidgets_LIBRARIES}")
 else()
-    message(STATUS "wxWidgets ${wxWidgets_REQUIRED_VERSION}+ not found, fetching from GitHub...")
+    message(STATUS "wxWidgets ${wxWidgets_REQUIRED_VERSION}+ not found, fetching v${wxWidgets_FETCH_VERSION} from GitHub...")
 
     include(FetchContent)
     set(wxBUILD_SHARED OFF)
@@ -28,7 +33,7 @@ else()
     FetchContent_Declare(
         wxWidgets
         GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
-        GIT_TAG v${wxWidgets_REQUIRED_VERSION}
+        GIT_TAG v${wxWidgets_FETCH_VERSION}
     )
     FetchContent_MakeAvailable(wxWidgets)
 
