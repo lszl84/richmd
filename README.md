@@ -21,7 +21,7 @@ cmake --build --preset default
 
 Builds with clang/clang++ via Ninja (see `CMakePresets.json`). Requires wxWidgets 3.2.8+; if not found on the system, CMake fetches and builds it automatically.
 
-On Windows, the build links libc++ and libunwind statically — the resulting executable does not require any DLLs.
+On Windows, the build links libc++ and libunwind statically — the resulting executable does not require any DLLs. Per-Monitor V2 HiDPI is enabled via `src/main.exe.manifest` and `src/resources.rc`. On macOS, `src/Info.plist` enables Retina rendering via `NSHighResolutionCapable`.
 
 ### VSCode / VSCodium
 

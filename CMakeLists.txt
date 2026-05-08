@@ -39,9 +39,15 @@ set(SRCS
 
 if(APPLE)
     add_executable(richmd MACOSX_BUNDLE ${SRCS})
+
+    # Custom plist: enables Retina/HiDPI rendering and sets bundle metadata.
+    set_target_properties(richmd PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/src/Info.plist)
 elseif(WIN32)
     # WIN32 makes the linker look for WinMain instead of main.
-    add_executable(richmd WIN32 ${SRCS})
+    # The .manifest declares Per-Monitor V2 DPI awareness; resources.rc pulls
+    # in wx's standard resource block (with wxUSE_DPI_AWARE_MANIFEST=2).
+    add_executable(richmd WIN32 ${SRCS} src/main.exe.manifest src/resources.rc)
 
     # static linking for a self-contained Windows binary (no DLL dependencies)
     target_link_options(richmd PRIVATE -static -fuse-ld=lld)
