@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=richmd
+Comment=Live-styling markdown editor
+Exec=richmd
+Terminal=false
+Type=Application
+Icon=richmd
+Categories=Office;TextEditor;
+Keywords=markdown;editor;notes;
+StartupWMClass=richmd

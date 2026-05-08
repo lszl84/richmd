@@ -51,3 +51,7 @@ install(TARGETS richmd
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     BUNDLE DESTINATION .
 )
+if(LINUX OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+    install(FILES richmd.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+    install(FILES richmd.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
+endif()
