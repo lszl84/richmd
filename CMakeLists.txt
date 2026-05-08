@@ -85,13 +85,6 @@ install(TARGETS richmd
 )
 
 if(WIN32)
-    # Use NEW behavior for CMP0207: file(GET_RUNTIME_DEPENDENCIES) normalizes
-    # all paths to forward slashes (otherwise mixed C:\Windows\system32/foo.dll
-    # vs C:/Windows/system32/foo.dll triggers a dev warning).
-    if(POLICY CMP0207)
-        cmake_policy(SET CMP0207 NEW)
-    endif()
-
     # MSYS2 shells export MINGW_PREFIX (e.g. /clang64 in CLANG64). Its bin/
     # holds the runtime DLLs we link against — wx_*, libc++, libunwind,
     # zlib, etc. Pass it to GET_RUNTIME_DEPENDENCIES so the resolver finds
@@ -105,8 +98,12 @@ if(WIN32)
 
     # Walk the installed .exe's PE imports and copy non-system runtime DLLs
     # into bin/ alongside the executable. PRE excludes Windows API sets,
-    # POST drops anything resolved from System32.
+    # POST drops anything resolved from System32. CMP0207 NEW must be set
+    # inside the install script — install(CODE) runs cmake_install.cmake in
+    # its own policy context, so a cmake_policy() at the project level here
+    # would not carry through to the file() call below.
     install(CODE "
+        cmake_policy(SET CMP0207 NEW)
         file(GET_RUNTIME_DEPENDENCIES
             EXECUTABLES \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/$<TARGET_FILE_NAME:richmd>\"
             RESOLVED_DEPENDENCIES_VAR _resolved
