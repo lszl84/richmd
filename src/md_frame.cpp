@@ -308,34 +308,48 @@ bool MDFrame::IsInsideCodeBlock(const wxString& fullText, long lineStart) const 
 void MDFrame::GetCodeBlockRange(const wxString& fullText, long lineStart,
                                  long& blockStart, long& blockEnd) const {
     blockStart = blockEnd = -1;
-    long ls, le;
-    GetLineRange(fullText, lineStart, ls, le);
     long totalLen = (long)fullText.length();
 
-    // Scan backwards for opening ```
-    long pos = ls;
-    while (pos > 0) {
-        long pls, ple;
-        if (pos - 1 < 0) break;
-        GetLineRange(fullText, pos - 1, pls, ple);
-        if (IsFenceLine(fullText.Mid((size_t)pls, (size_t)(ple - pls))))
-            { blockStart = pls; break; }
-        pos = pls;
-    }
-    if (blockStart < 0) return;
+    // Count ``` fence lines from the start of the document up to the
+    // beginning of the current line.  An odd count means we are inside
+    // a code block.  Also track the position of the last fence seen
+    // (the opening) and the first fence after our line (the closing).
+    int fenceCount = 0;
+    long lastFencePos = -1;
+    long nextFencePos = -1;
 
-    // Scan forwards for closing ```
-    pos = le;
-    while (pos < totalLen) {
-        if (pos < totalLen && fullText[(size_t)pos] == '\n') ++pos;
-        if (pos >= totalLen) break;
-        long nls, nle;
-        GetLineRange(fullText, pos, nls, nle);
-        if (IsFenceLine(fullText.Mid((size_t)nls, (size_t)(nle - nls))))
-            { blockEnd = nle; return; }
-        pos = nle;
+    long pos = 0;
+    wxStringTokenizer tkz(fullText, "\n", wxTOKEN_RET_EMPTY_ALL);
+
+    while (tkz.HasMoreTokens()) {
+        wxString line = tkz.GetNextToken();
+        long lineLen = (long)line.length();
+        long ls = pos;
+        pos += lineLen + 1;
+
+        if (IsFenceLine(line)) {
+            if (ls < lineStart) {
+                ++fenceCount;
+                lastFencePos = ls;
+            } else if (ls > lineStart && nextFencePos < 0) {
+                nextFencePos = ls;
+            }
+        }
     }
-    blockEnd = totalLen;  // unclosed block extends to EOF
+
+    // If the current line itself is a fence, we're not inside a block.
+    {
+        long ls, le;
+        GetLineRange(fullText, lineStart, ls, le);
+        wxString curLine = fullText.Mid((size_t)ls, (size_t)(le - ls));
+        if (IsFenceLine(curLine)) return;
+    }
+
+    // Odd fence count → we are inside a code block.
+    if ((fenceCount % 2) == 1 && lastFencePos >= 0) {
+        blockStart = lastFencePos;
+        blockEnd   = (nextFencePos >= 0) ? nextFencePos : totalLen;
+    }
 }
 
 // ---- Event handlers ----
