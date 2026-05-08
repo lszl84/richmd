@@ -41,6 +41,34 @@ jobs:
             build/richmd-*.deb
             build/richmd-*.tar.gz
 
+      - name: Build AppImage
+        env:
+          # AppImage tools are themselves AppImages; on Ubuntu 24.04 (no
+          # libfuse2 by default) the FUSE-mount path fails. extract-and-run
+          # mode uses a tmpfs unpack instead.
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          version=$(grep -oP 'project\(richmd VERSION \K[0-9.]+' CMakeLists.txt)
+          cmake --install build --prefix AppDir/usr
+          curl -L -o linuxdeploy-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -L -o linuxdeploy-plugin-gtk.sh \
+            https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
+          OUTPUT="richmd-${version}-x86_64.AppImage" \
+            ./linuxdeploy-x86_64.AppImage \
+              --appdir AppDir \
+              --plugin gtk \
+              --desktop-file AppDir/usr/share/applications/richmd.desktop \
+              --icon-file AppDir/usr/share/icons/hicolor/scalable/apps/richmd.svg \
+              --output appimage
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-appimage
+          path: richmd-*.AppImage
+
   macos:
     name: macOS
     runs-on: macos-14
@@ -104,9 +132,32 @@ jobs:
           name: windows-installer
           path: build/richmd-*.exe
 
+  flatpak:
+    name: Flatpak
+    runs-on: ubuntu-24.04
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-46
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build bundle
+        uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: richmd.flatpak
+          manifest-path: flatpak/com.devmindscape.richmd.yaml
+          cache-key: flatpak-builder-${{ hashFiles('flatpak/com.devmindscape.richmd.yaml') }}
+          upload-artifact: false
+
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-flatpak
+          path: richmd.flatpak
+
   release:
     name: Publish GitHub Release
-    needs: [linux, macos, windows]
+    needs: [linux, macos, windows, flatpak]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     permissions:

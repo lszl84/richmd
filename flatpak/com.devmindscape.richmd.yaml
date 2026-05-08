@@ -1,0 +1,42 @@
+app-id: com.devmindscape.richmd
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: richmd
+
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  # Markdown editor: needs to read/write user files. Granting --filesystem=home
+  # is the simplest mode; tighten to xdg-documents/xdg-download if you'd
+  # rather scope it.
+  - --filesystem=home
+
+modules:
+  - name: wxwidgets
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DwxBUILD_SHARED=OFF
+      - -DwxBUILD_DEMOS=OFF
+      - -DwxBUILD_SAMPLES=OFF
+      - -DwxBUILD_TESTS=OFF
+      - -DwxUSE_OPENGL=OFF
+      - -DwxUSE_WEBVIEW=OFF
+      - -DwxUSE_MEDIACTRL=OFF
+    sources:
+      - type: git
+        url: https://github.com/wxWidgets/wxWidgets.git
+        tag: v3.2.8
+
+  - name: richmd
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: dir
+        path: ..
