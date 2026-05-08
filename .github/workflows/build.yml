@@ -1,0 +1,109 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: Linux (Ubuntu 24.04)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang ninja-build cmake \
+            libwxgtk3.2-dev libgtk-3-dev \
+            dpkg-dev file
+
+      - name: Configure
+        run: cmake --preset release
+
+      - name: Build
+        run: cmake --build --preset release
+
+      - name: Package
+        working-directory: build
+        run: cpack
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-installers
+          path: |
+            build/richmd-*.deb
+            build/richmd-*.tar.gz
+
+  macos:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: brew install ninja wxwidgets
+
+      - name: Configure
+        run: cmake --preset release
+
+      - name: Build
+        run: cmake --build --preset release
+
+      - name: Package
+        working-directory: build
+        run: cpack
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: build/richmd-*.dmg
+
+  windows:
+    name: Windows (mingw-clang)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSYS2 (CLANG64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          update: true
+          install: >-
+            mingw-w64-clang-x86_64-toolchain
+            mingw-w64-clang-x86_64-cmake
+            mingw-w64-clang-x86_64-ninja
+        # We deliberately don't install msys2's wxwidgets package — the
+        # CLANG64 build is shared, and our target uses -static for a
+        # DLL-free .exe. CMake's FetchContent path builds wx statically.
+
+      - name: Configure
+        run: cmake --preset release
+
+      - name: Build
+        run: cmake --build --preset release
+
+      - name: Package
+        working-directory: build
+        # NSIS is preinstalled on GitHub Windows runners; expose makensis to
+        # the msys2 shell so cpack's NSIS generator can find it.
+        run: |
+          export PATH="/c/Program Files (x86)/NSIS:$PATH"
+          cpack
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: build/richmd-*.exe
