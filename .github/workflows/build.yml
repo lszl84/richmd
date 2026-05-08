@@ -76,6 +76,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install NSIS
+        # windows-2025 (= windows-latest) does not preinstall NSIS. Choco does.
+        shell: pwsh
+        run: choco install nsis -y --no-progress
+
       - name: Set up MSYS2 (CLANG64)
         uses: msys2/setup-msys2@v2
         with:
